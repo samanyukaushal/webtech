@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College History Quiz OF MAIT</title>
+  <style>
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f0f4f8;
+      color: #333;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2em;
+      color: #0077cc;
+      animation: fadeIn 2s ease-in;
+    }
+
+    main {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #question {
+      margin-bottom: 15px;
+      animation: slideIn 0.5s ease-in-out;
+    }
+
+    #options li {
+      list-style: none;
+      background: #e0e0e0;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    #options li:hover,
+    #options li.selected {
+      background: #a0d2eb;
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    #submit {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #0077cc;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #submit:hover {
+      background-color: #005fa3;
+    }
+
+    #feedback {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    #results {
+      text-align: center;
+      margin-top: 30px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    #progress-bar {
+      height: 5px;
+      background-color: #0077cc;
+      margin-bottom: 20px;
+    }
+
+    #timer {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #f44336;
+      animation: bounce 1.5s infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>Test Your Knowledge: College History & Courses</h1>
+  </header>
+
+  <main>
+    <section id="quiz-container" role="main">
+      <div id="progress-bar"></div>
+      <div id="question-box">
+        <h2 id="question">Loading...</h2>
+        <ul id="options"></ul>
+      </div>
+      <button id="submit">Submit</button>
+      <div id="feedback"></div>
+      <div id="timer">Time remaining: <span id="time-left">30</span> seconds</div>
+    </section>
+    <section id="results" style="display:none">
+      <h2>Your Score: <span id="score"></span>/10</h2>
+      <button onclick="location.reload()">Retake Quiz</button>
+      <button id="share-results">Share Results</button>
+    </section>
+  </main>
+
+  <script>
+  // questions of our cllg
+    const quizData = [
+      {
+        question: "When was our college established?",
+        options: ["1950", "1999", "1980", "1995"],
+        answer: 1
+      },
+      {
+        question: "What is the official motto of our college?",
+        options: ["Knowledge is Power", "Learn and Lead", "Truth Shall Prevail", "UNITY AND DISCIPLINE"],
+        answer: 3
+      },
+      {
+        question: "Who is the professor for Web tech for IT?", 
+        options: ["Prof. Neha", "Prof Narinder", "Prof. varun Goel", "Dr Amita goel"],
+        answer: 1
+      },
+      {
+        question: "Who is the current Dean of the college?",
+        options: ["Dr. Neelam", "Prof. Sandeep", "Dr. N.K Garg", "Dr. Amita Goel"],
+        answer: 2
+      },
+      {
+        question: "What is the duration of the BTech program?",
+        options: ["2 years", "3 years", "4 years", "5 years"],
+        answer: 2
+      },
+      {
+        question: "Where is Maharaja Agrasen Institute of Technology located?",
+        options: ["Gurugram", "Rohini, Delhi", "Noida", "Faridabad"],
+        answer: 1
+      },
+      {
+        question: "Which university is MAIT affiliated with?",
+        options: ["Delhi University", "Amity University", "IP University", "JNU"],
+        answer: 2
+      },
+      {
+        question: "Which annual techno-cultural fest is organized by MAIT?",
+        options: ["Momentum", "TechAura", "Ingenium", "Agaz"],
+        answer: 1
+      },
+      {
+        question: "What is the name of the governing trust of MAIT?",
+        options: ["Maharaja Agrasen Education Trust", "Maharaja Agrasen Technical Society", "MAIT Foundation", "Delhi Technical Trust"],
+        answer: 1
+      },
+      {
+        question: "Which of the following branches is NOT offered in B.Tech at MAIT?",
+        options: ["CSE (Artificial Intelligence)", "Architect Engineering", "Mechanical Engineering", "Information Technology"],
+        answer: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 30;
+
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const submitBtn = document.getElementById("submit");
+    const feedbackEl = document.getElementById("feedback");
+    const scoreEl = document.getElementById("score");
+    const resultsEl = document.getElementById("results");
+    const progressBar = document.getElementById("progress-bar");
+    const timeLeftEl = document.getElementById("time-left");
+    const shareBtn = document.getElementById("share-results");
+
+    submitBtn.addEventListener("click", submitAnswer);
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = "";
+      q.options.forEach((opt, idx) => {
+        const li = document.createElement("li");
+        li.textContent = opt;
+        li.onclick = () => {
+          document.querySelectorAll("#options li").forEach(li => li.classList.remove("selected"));
+          li.classList.add("selected");
+        };
+        optionsEl.appendChild(li);
+      });
+      startTimer();
+      updateProgress();
+    }
+
+    function startTimer() {
+      timeLeft = 30;
+      timeLeftEl.textContent = timeLeft;
+      timer = setInterval(() => {
+        timeLeft--;
+        timeLeftEl.textContent = timeLeft;
+        if (timeLeft === 0) {
+          clearInterval(timer);
+          submitAnswer();
+        }
+      }, 1000);
+    }
+
+    function submitAnswer() {
+      const selected = document.querySelector("#options li.selected");
+      if (!selected) return alert("Please select an option");
+
+      const index = Array.from(optionsEl.children).indexOf(selected);
+      const correct = quizData[currentQuestion].answer;
+
+      if (index === correct) {
+        score++;
+        feedbackEl.textContent = "Correct! 🎉";
+        feedbackEl.style.color = "green";
+      } else {
+        feedbackEl.textContent = `Incorrect! Correct answer: ${quizData[currentQuestion].options[correct]}`;
+        feedbackEl.style.color = "red";
+      }
+
+      clearInterval(timer);
+      currentQuestion++;
+      setTimeout(() => {
+        feedbackEl.textContent = "";
+        if (currentQuestion < quizData.length) {
+          loadQuestion();
+        } else {
+          showResults();
+        }
+      }, 1500);
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / quizData.length) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    function showResults() {
+      scoreEl.textContent = score;
+      document.getElementById("quiz-container").style.display = "none";
+      resultsEl.style.display = "block";
+    }
+
+    // Randomize 
+    function randomizeQuiz() {
+      quizData.sort(() => Math.random() - 0.5); 
+    }
+
+    // Share 
+    shareBtn.addEventListener("click", () => {
+  
+  setTimeout(() => {
+    //ss
+    html2canvas(document.querySelector("#results")).then(canvas => {
+      // Create a image 
+      const imgData = canvas.toDataURL('image/png');
+
+      //  temporary link to download
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = 'quiz_screenshot.png';
+
+      // Trigger 
+      link.click();
+    });
+  }, 500); // 0.5s dely
+});
+
+    // begin
+    randomizeQuiz();
+    loadQuestion();
+  </script>
+</body>
+
+</html>
